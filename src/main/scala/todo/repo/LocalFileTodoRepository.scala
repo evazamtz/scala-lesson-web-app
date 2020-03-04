@@ -3,8 +3,9 @@ package todo.repo
 import java.io.PrintWriter
 
 import cats.effect.IO
-import cats.effect._
+import cats.effect.concurrent.Semaphore
 import cats.implicits._
+
 import io.circe.parser.decode
 import io.circe.syntax._
 import io.circe.generic.auto._
@@ -12,7 +13,7 @@ import todo.domain._
 
 import scala.io.Source
 
-class LocalFileTodoRepository(val pathToDb:String) extends TodoRepository {
+class LocalFileTodoRepository(val pathToDb:String, semaphore: Semaphore[IO]) extends TodoRepository {
   type Todos = Map[Int,Todo]
 
   protected def load:IO[Todos] = for {
@@ -34,16 +35,21 @@ class LocalFileTodoRepository(val pathToDb:String) extends TodoRepository {
   } yield todos get id
 
   override def append(msg: String): IO[Unit] = for {
+    _        <- semaphore.acquire
     todos    <- load
     newId    = if (todos.isEmpty) 1 else (todos maxBy (_._1))._1 + 1
     newTodos = todos.updated(newId, Todo(newId, msg, Pending))
+    _        <- if (msg == "wait") IO { Thread.sleep(10000) } else IO.unit
     _        <- flush(newTodos)
+    _        <- semaphore.release
   } yield ()
 
   override def complete(id: Int): IO[Option[Unit]] = for {
+    _        <- semaphore.acquire
     todos    <- load
     todoO    =  todos.get(id) map { _.copy(status=Complete) }
     flushIO  =  todoO map {t => flush(todos.updated(id, t)) as Some( () ) }
     io       <- flushIO getOrElse { IO.pure(Option.empty[Unit]) }
+    _        <- semaphore.release
   } yield io
 }

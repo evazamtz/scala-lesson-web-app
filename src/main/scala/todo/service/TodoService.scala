@@ -27,7 +27,7 @@ object TodoService {
 
     case GET -> Root / "todo" => for {
       todos    <- repo.findAll
-      response <- Ok { todos jsoned }
+      response <- Ok (todos.jsoned, Header("Content-Type", "application/json") )
     } yield response
 
     case GET -> Root / "todo" / IntVar(id) => for {
