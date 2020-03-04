@@ -1,0 +1,10 @@
+http = {
+  port = 8080
+  host = "localhost"
+}
+
+repo = {
+  local-file = {
+    path = "repo.json"
+  }
+}

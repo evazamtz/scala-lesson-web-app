@@ -26,7 +26,8 @@ libraryDependencies ++= Seq(
 
   "org.slf4j" % "slf4j-simple" % "1.7.22",
   "org.slf4j" % "slf4j-api" % "1.7.22",
-  "org.scala-lang" % "scala-reflect" % scalaVersion.value
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value ,
+  "com.github.pureconfig" %% "pureconfig" % "0.12.3" 
 )
 
 scalacOptions ++= Seq("-Ypartial-unification")

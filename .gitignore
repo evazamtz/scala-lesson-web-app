@@ -2,3 +2,5 @@
 /project/target
 /.idea
 /project/project/target
+/src/main/resource/application.conf
+/repo.json
